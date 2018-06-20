@@ -3,7 +3,7 @@ import csv
 import time
 from operator import itemgetter
 import ast
-import pathlib
+from pathlib import Path
 
 # this block constructs the user item dictionary, with some helper functions
 def getItem(id, idNameDescription):
@@ -128,7 +128,7 @@ def createRecommendationDict(userItemDict, dfTime, idNameDescription, itemSimila
         else:
             recommendationDict[userId] = getRecommendation(userId, numberOfRecom, userItemDict, dfTime, idNameDescription, itemSimilarityDict)
     print('RecommendationDict constructed. It has ' + str(len(recommendationDict)) + ' entries.')
-    print("Constructing recommendation Dictionary takes %s seconds" % (time.time() - start_time))
+    print("Constructing recommendation Dictionary takes %s seconds" % ('%.3f'%(time.time() - start_time)))
     return recommendationDict
 
 #result is a dictionary
@@ -143,20 +143,27 @@ def saveModelToCSV(results):
         for key, value in results.items():
             writer.writerow([key, value])
     csv_file.close()
-    print('recommendataion dictionary saved')
+    print('Recommendataion dictionary saved')
 
-#load files
-path = 'models'
-with open(path + '/itemSimilarity.csv', 'r') as csv_file:
-    reader = csv.reader(csv_file)
-    itemSimilarityDict = dict(reader)
-idNameDescription = pd.read_csv('data/idNameDescription.csv')
-userProduct = pd.read_csv('data/userProduct.csv')
-productTime = pd.read_csv('data/productTime.csv')
+def checkRecommendationDict():
+    return Path('models/recommendationDict.csv').is_file()
 
-# convert string to number
-itemSimilarityDict = {int(k):ast.literal_eval(v) for k,v in itemSimilarityDict.items()}
+if(not checkRecommendationDict()):
+    #load files
+    path = 'models'
+    with open(path + '/itemSimilarity.csv', 'r') as csv_file:
+        reader = csv.reader(csv_file)
+        itemSimilarityDict = dict(reader)
+    idNameDescription = pd.read_csv('data/idNameDescription.csv')
+    userProduct = pd.read_csv('data/userProduct.csv')
+    productTime = pd.read_csv('data/productTime.csv')
 
-userItemDict = createUserItemDict(userProduct)
-recommendationDict = createRecommendationDict(userItemDict, productTime, idNameDescription, itemSimilarityDict)
-saveModelToCSV(recommendationDict)
+    # convert string to number
+    itemSimilarityDict = {int(k):ast.literal_eval(v) for k,v in itemSimilarityDict.items()}
+
+    userItemDict = createUserItemDict(userProduct)
+    recommendationDict = createRecommendationDict(userItemDict, productTime, idNameDescription, itemSimilarityDict)
+    saveModelToCSV(recommendationDict)
+    print('Recommendation dictionary saved')
+else:
+    print('Recommendation dictionary already exits')

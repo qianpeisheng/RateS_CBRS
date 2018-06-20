@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import linear_kernel
 import time
 import csv
 import pathlib
+from pathlib import Path
 
 #this block trains the model
 def train(df):
@@ -20,7 +21,7 @@ def train(df):
         # First item is the item itself, so remove it.
         # Each dictionary entry is like: [(1,2), (3,4)], with each tuple being (score, item_id)
         results[row['id']] = similar_items[1:]
-    print("Training completed. It takes %s seconds" % (time.time() - start_time))
+    print("Training completed. It takes %s seconds" % ('%.3f'%(time.time() - start_time)))
     return results
 
 #result is a dictionary
@@ -34,9 +35,14 @@ def saveModelToCSV(results, addr):
             writer.writerow([key, value])
     csv_file.close()
 
+def checkSimilarityModel(addr):
+    return Path(addr + '/itemSimilarity.csv').is_file()
 
-df = pd.read_csv('data/description.csv')
-results = train(df)
 path = 'models'
-pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-saveModelToCSV(results, path)
+if (not checkSimilarityModel(path)):
+    df = pd.read_csv('data/description.csv')
+    results = train(df)
+    Path(path).mkdir(parents=True, exist_ok=True)
+    saveModelToCSV(results, path)
+else:
+    print('Item silimarity model already exists')

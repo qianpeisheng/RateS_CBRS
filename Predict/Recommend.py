@@ -3,7 +3,7 @@ import csv
 import ast
 
 #load files
-with open('../Model/models/recommendationDict.csv', 'r') as csv_file:
+with open('models/recommendationDict.csv', 'r') as csv_file:
     reader = csv.reader(csv_file)
     recommendationDict = dict(reader)
 recommendationDict = {int(k):ast.literal_eval(v) for k,v in recommendationDict.items()}

@@ -1,6 +1,6 @@
 import psycopg2
 import pandas as pd
-import pathlib
+from pathlib import Path
 import os
 
 def connectToDB():
@@ -47,9 +47,17 @@ def saveToCSV(conn, addr):
     df2.to_csv(addr + '/description.csv', index=False)
     df5.to_csv(addr + '/userProduct.csv', index=False)
 
+def checkDataFile(addr) :
+    return Path(addr + '/productTime.csv').is_file() and Path(addr + '/idNameDescription.csv').is_file() and Path(addr + '/description.csv').is_file() and Path(addr + '/userProduct.csv').is_file()
 
-conn = connectToDB()
 path = cwd = os.getcwd() + '/data'
-pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-saveToCSV(conn, path)
-print('Data read from DB and saved to CSV.')
+if(not checkDataFile(path)):
+    print('Connect to database')
+    conn = connectToDB()
+    Path(path).mkdir(parents=True, exist_ok=True)
+    print('Retrieve data from database')
+    saveToCSV(conn, path)
+    print('Data read from DB and saved to CSV')
+else:
+    print('CSV files already exist')
+
