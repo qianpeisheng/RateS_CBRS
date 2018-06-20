@@ -17,7 +17,11 @@ userProductNameDict = loadUserProductNameDict()
 while(True):
     print('Press ctrl + c or cmd + c to quit')
     print('\nTry userID ' + str(random.choice(validUsers)) + '\n')
-    userId = int(input('Enter a user ID: '))
+    try:
+        userId = int(input('Enter a user ID: '))
+    except (NameError, ValueError):
+        print(str(userId) + ' is not valid')
+        continue
     print('\nUser ' + str(userId) + ' has purchased:\n')
     printListOfItems(getUserProductNames(userId, userProductNameDict))
     print('\nUser ' + str(userId) + ' will see:\n')
