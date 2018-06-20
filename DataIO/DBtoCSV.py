@@ -1,6 +1,7 @@
 import psycopg2
 import pandas as pd
 import pathlib
+import os
 
 def connectToDB():
     connect_str = "dbname='rates_prod' user='postgres' host='localhost' " + \
@@ -41,10 +42,14 @@ def saveToCSV(conn, addr):
     df = df[['id','last_created']]
     
     #this block saves data to local storage as csv files
-    pathlib.Path('data').mkdir(parents=True, exist_ok=True) 
     df.to_csv(addr + '/productTime.csv', index=False)
     df1.to_csv(addr + '/idNameDescription.csv', index=False)
     df2.to_csv(addr + '/description.csv', index=False)
     df5.to_csv(addr + '/userProduct.csv', index=False)
 
 
+conn = connectToDB()
+path = cwd = os.getcwd() + '/data'
+pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+saveToCSV(conn, path)
+print('Data read from DB and saved to CSV.')

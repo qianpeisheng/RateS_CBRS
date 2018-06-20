@@ -5,17 +5,6 @@ from operator import itemgetter
 import ast
 import pathlib
 
-#load files
-with open('models/itemSimilarity.csv', 'r') as csv_file:
-    reader = csv.reader(csv_file)
-    itemSimilarityDict = dict(reader)
-idNameDescription = pd.read_csv('../DataIO/data/idNameDescription.csv')
-userProduct = pd.read_csv('../DataIO/data/userProduct.csv')
-productTime = pd.read_csv('../DataIO/data/productTime.csv')
-
-# convert string to number
-itemSimilarityDict = {int(k):ast.literal_eval(v) for k,v in itemSimilarityDict.items()}
-
 # this block constructs the user item dictionary, with some helper functions
 def getItem(id, idNameDescription):
     return idNameDescription.loc[idNameDescription['id'] == id].values[0][1]
@@ -43,7 +32,6 @@ def createUserItemDict(df):
         else:
             dict[record[0]] = [record[1]]
     return dict
-userItemDict = createUserItemDict(userProduct)
 
 # this block defines the function to get recommendation for a specific user, with some helper functions
 
@@ -110,7 +98,7 @@ def getRecommendation(userId, num, userItemDict, dfTime, idNameDescription, item
 #And the placeholders need to change
 
 def hasNoHistory(userId, userItemDict):
-    return not userId in userItemDict;
+    return not userId in userItemDict
 
 def getRecommendationForUserWOHistory(userId):
     #placeholder
@@ -122,7 +110,11 @@ def getRecommendationForUserWOHistory(userId):
 def createRecommendationDict(userItemDict, dfTime, idNameDescription, itemSimilarityDict):
     start_time = time.time()
     
-    numberOfRecom = 100
+    #maximum number of items recommended
+    #use a small number for testing (e.g. 10)
+    #use a large number in production (e.g. 100)
+
+    numberOfRecom = 10
     recommendationDict = {}
     
     # currently the list of userId is not available
@@ -139,13 +131,11 @@ def createRecommendationDict(userItemDict, dfTime, idNameDescription, itemSimila
     print("Constructing recommendation Dictionary takes %s seconds" % (time.time() - start_time))
     return recommendationDict
 
-recommendationDict = createRecommendationDict(userItemDict, productTime, idNameDescription, itemSimilarityDict)
-
 #result is a dictionary
 #key is product id
 #value is a list of pair(score, product id)
 #save this to csv
-pathlib.Path('models').mkdir(parents=True, exist_ok=True)
+
 
 def saveModelToCSV(results):
     with open('models/recommendationDict.csv', 'w') as csv_file:
@@ -153,4 +143,20 @@ def saveModelToCSV(results):
         for key, value in results.items():
             writer.writerow([key, value])
     csv_file.close()
+    print('recommendataion dictionary saved')
+
+#load files
+path = 'models'
+with open(path + '/itemSimilarity.csv', 'r') as csv_file:
+    reader = csv.reader(csv_file)
+    itemSimilarityDict = dict(reader)
+idNameDescription = pd.read_csv('data/idNameDescription.csv')
+userProduct = pd.read_csv('data/userProduct.csv')
+productTime = pd.read_csv('data/productTime.csv')
+
+# convert string to number
+itemSimilarityDict = {int(k):ast.literal_eval(v) for k,v in itemSimilarityDict.items()}
+
+userItemDict = createUserItemDict(userProduct)
+recommendationDict = createRecommendationDict(userItemDict, productTime, idNameDescription, itemSimilarityDict)
 saveModelToCSV(recommendationDict)

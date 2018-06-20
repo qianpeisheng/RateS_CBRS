@@ -6,10 +6,7 @@ import time
 import csv
 import pathlib
 
-df = pd.read_csv('../DataIO/data/description.csv')
-
 #this block trains the model
-
 def train(df):
     start_time = time.time()
     tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 3), min_df=0, stop_words='english')
@@ -26,18 +23,20 @@ def train(df):
     print("Training completed. It takes %s seconds" % (time.time() - start_time))
     return results
 
-results = train(df)
-
 #result is a dictionary
 #key is product id
 #value is a list of pair(score, product id)
 #save this to csv
-pathlib.Path('models').mkdir(parents=True, exist_ok=True)
-
-def saveModelToCSV(results):
-    with open('models/itemSimilarity.csv', 'w') as csv_file:
+def saveModelToCSV(results, addr):
+    with open(addr + '/itemSimilarity.csv', 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in results.items():
             writer.writerow([key, value])
     csv_file.close()
-saveModelToCSV(results)
+
+
+df = pd.read_csv('data/description.csv')
+results = train(df)
+path = 'models'
+pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+saveModelToCSV(results, path)
