@@ -20,7 +20,7 @@ Is the user in the recommendDictionary?
         No ---- show default
 '''
 def hasHistory(userId, recommendationDict):
-    return recommendationDict[userId]
+    return userId in recommendationDict
 
 # the data component retrieves the user product table
 # and compare with the existing table
@@ -43,10 +43,10 @@ def hasCategories(userId):
     return True
 
 def recommendByCategories(userId):
-    return ["test"] * 10
+    return ["?"]
 
 def recommendDefault():
-    return ["test"] * 10
+    return ["test"]
 #API to create a personal feed
 #need to provide a userId, the recommendationDict argument should be recommendationDict
 #which is constructed in the model component and loaded in the block above
@@ -63,5 +63,5 @@ def getRecommendationList(userId, recommendationDict, num, pageNumber):
     else:
         return recommendDefault()
 
-# example usage
+#example usage
 #getRecommendationList(771, recommendationDict,10, 3)

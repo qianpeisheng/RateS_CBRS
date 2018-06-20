@@ -4,6 +4,7 @@ import time
 from operator import itemgetter
 import ast
 from pathlib import Path
+import sys
 
 # this block constructs the user item dictionary, with some helper functions
 def getItem(id, idNameDescription):
@@ -137,16 +138,45 @@ def createRecommendationDict(userItemDict, dfTime, idNameDescription, itemSimila
 #save this to csv
 
 
-def saveModelToCSV(results):
-    with open('models/recommendationDict.csv', 'w') as csv_file:
+def saveModelToCSV(results, fileName):
+    with open(fileName, 'w') as csv_file:
         writer = csv.writer(csv_file)
         for key, value in results.items():
             writer.writerow([key, value])
     csv_file.close()
-    print('Recommendataion dictionary saved')
+    print(fileName + ' saved')
 
 def checkRecommendationDict():
     return Path('models/recommendationDict.csv').is_file()
+
+def createUserProductNameDict(userItemDict, userProduct):
+    userProductNameDict = {}
+    for k, v in userItemDict.items():
+        for itemId in v:
+            #print(idNameDescription.loc[idNameDescription['id'] == itemId].values[0][1])
+            itemName = idNameDescription.loc[idNameDescription['id'] == itemId].values[0][1]
+            if k in userProductNameDict:
+                userProductNameDict[k].append(itemName)
+            else:
+                userProductNameDict[k] = [itemName]
+    return userProductNameDict
+
+
+def loadUserProductNameDict():
+        #load files
+    path = 'models'
+    with open(path + '/userProductNameDict.csv', 'r') as csv_file:
+        reader = csv.reader(csv_file)
+        userProductNameDict = dict(reader)
+    # convert string to number
+    userProductNameDict = {int(k):ast.literal_eval(v) for k,v in userProductNameDict.items()}
+    return userProductNameDict
+
+def getUserProductNames(userId, d):
+    if userId in d:
+        return d[userId]
+    else:
+        return '?'
 
 if(not checkRecommendationDict()):
     #load files
@@ -162,8 +192,10 @@ if(not checkRecommendationDict()):
     itemSimilarityDict = {int(k):ast.literal_eval(v) for k,v in itemSimilarityDict.items()}
 
     userItemDict = createUserItemDict(userProduct)
+    userProductNameDict = createUserProductNameDict(userItemDict, userProduct)
     recommendationDict = createRecommendationDict(userItemDict, productTime, idNameDescription, itemSimilarityDict)
-    saveModelToCSV(recommendationDict)
-    print('Recommendation dictionary saved')
+    saveModelToCSV(recommendationDict, 'models/recommendationDict.csv')
+#    saveModelToCSV(userItemDict, 'models/userItemDict.csv')
+    saveModelToCSV(userProductNameDict, 'models/userProductNameDict.csv')
 else:
     print('Recommendation dictionary already exits')
